@@ -11,6 +11,13 @@ BOARD = (
     ("a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8"),
 )
 
+PIECES = {
+    'B': 2,
+    'N': 3,
+    'R': 4,
+    'Q': 5,
+    'K': 6
+}
 
 def pawn_moves(board, row, col):
     # TODO: Implement Pawn movement
@@ -47,23 +54,39 @@ def king_moves(board, row, col):
     pass
 
 
-def find_legal_moves(board, player):
+def check_if_legal(board, player, move):
+    target= move[-2:]
+    if move[0] not in PIECES:
+        piece = 1
+    else:
+        piece = PIECES[move[0]]
+    if player == 1:
+        piece = -piece
     moves = []
-    for row in board:
-        for col, square in enumerate(row):
-            if square > 0 and player == 0 or square < 0 and player == 1:
-                if abs(square) == 1:
-                    moves += pawn_moves(board, row, col)
-                elif abs(square) == 2:
-                    moves += bishop_moves(board, row, col)
-                elif abs(square) == 3:
-                    moves += knight_moves(board, row, col)
-                elif abs(square) == 4:
-                    moves += rook_moves(board, row, col)
-                elif abs(square) == 5:
-                    moves += queen_moves(board, row, col)
-                elif abs(square) == 6:
-                    moves += king_moves(board, row, col)
+    for row, line in enumerate(board):
+        for col, square in enumerate(line):
+            cur = BOARD[row][col]
+            if square == piece:
+                if piece == 1:
+                    if target in pawn_moves(board, row, col):
+                        return cur, target
+                elif piece == 2:
+                    if target in bishop_moves(board, row, col):
+                        return cur, target
+                elif piece == 3:
+                    if target in knight_moves(board, row, col):
+                        return cur, target
+                elif piece == 4:
+                    if target in rook_moves(board, row, col):
+                        return cur, target
+                elif piece == 5:
+                    if target in queen_moves(board, row, col):
+                        return cur, target
+                elif piece == 6:
+                    if target in king_moves(board, row, col):
+                        return cur, target
+
+
     return tuple(moves)
 
 
@@ -92,9 +115,9 @@ def main():
     count = 0
     while not game_over:
         count += 1
-        find_legal_moves(board, cur_turn)
+        print(board)
         move = input("Enter move: ")
-        if move[0]=='N':
+        check_if_legal(board, cur_turn, move)
 
         cur_turn = not cur_turn
 
