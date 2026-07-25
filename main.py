@@ -1,4 +1,4 @@
-import pygame
+# import pygame
 
 BOARD = (
     ("a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1"),
@@ -19,6 +19,15 @@ PIECES = {
     'K': 6
 }
 
+
+def format_moves(moves, board):
+    formatted_moves = []
+    for move in moves:
+        if 8 > move[0] > -1 and 8 > move[1] > -1 and board[move[0]][move[1]] == 0:
+            formatted_moves.append(BOARD[move[0]][move[1]])
+    return tuple(formatted_moves)
+
+
 def pawn_moves(board, row, col):
     # TODO: Implement Pawn movement
     pass
@@ -32,11 +41,7 @@ def bishop_moves(board, row, col):
 def knight_moves(board, row, col):
     moves = [(row + 2, col + 1), (row + 2, col - 1), (row - 2, col + 1), (row - 2, col - 1), (row - 1, col + 2),
              (row - 1, col - 2), (row + 1, col - 2), (row + 1, col + 2)]
-    formated_moves = []
-    for move in moves:
-        if move[0]>-1 and move[1]>-1 and board[move[0]][move[1]] == 0:
-            formated_moves.append(BOARD[move[0]][move[1]])
-    return tuple(formated_moves)
+    return format_moves(moves, board)
 
 
 def rook_moves(board, row, col):
@@ -50,18 +55,17 @@ def queen_moves(board, row, col):
 
 
 def king_moves(board, row, col):
-    # TODO: Implement King movement
-    pass
+    moves = [(row, col + 1), (row, col - 1), (row + 1, col), (row - 1, col), (row - 1, col - 1),
+             (row - 1, col + 1), (row + 1, col - 1), (row + 1, col + 1)]
+    return format_moves(moves, board)
 
 
 def check_if_legal(board, player, move):
-    target= move[-2:]
+    target = move[-2:]
     if move[0] not in PIECES:
         piece = 1
     else:
         piece = PIECES[move[0]]
-    if player == 1:
-        piece = -piece
     moves = []
     for row, line in enumerate(board):
         for col, square in enumerate(line):
@@ -85,7 +89,6 @@ def check_if_legal(board, player, move):
                 elif piece == 6:
                     if target in king_moves(board, row, col):
                         return cur, target
-
 
     return tuple(moves)
 
