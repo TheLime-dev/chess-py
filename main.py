@@ -66,27 +66,29 @@ def check_if_legal(board, player, move):
         piece = 1
     else:
         piece = PIECES[move[0]]
+    if player == 1:
+        piece = -piece
     moves = []
     for row, line in enumerate(board):
         for col, square in enumerate(line):
             cur = BOARD[row][col]
             if square == piece:
-                if piece == 1:
+                if abs(piece) == 1:
                     if target in pawn_moves(board, row, col):
                         return cur, target
-                elif piece == 2:
+                elif abs(piece) == 2:
                     if target in bishop_moves(board, row, col):
                         return cur, target
-                elif piece == 3:
+                elif abs(piece) == 3:
                     if target in knight_moves(board, row, col):
                         return cur, target
-                elif piece == 4:
+                elif abs(piece) == 4:
                     if target in rook_moves(board, row, col):
                         return cur, target
-                elif piece == 5:
+                elif abs(piece) == 5:
                     if target in queen_moves(board, row, col):
                         return cur, target
-                elif piece == 6:
+                elif abs(piece) == 6:
                     if target in king_moves(board, row, col):
                         return cur, target
 
