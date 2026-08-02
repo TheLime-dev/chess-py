@@ -54,13 +54,13 @@ def bishop_moves(board, row, col, player):
                     break
                 else:
                     break
-    return format_moves(moves, board)
+    return format_moves(moves, board, player)
 
 
-def knight_moves(board, row, col):
+def knight_moves(board, row, col, player):
     moves = [(row + 2, col + 1), (row + 2, col - 1), (row - 2, col + 1), (row - 2, col - 1), (row - 1, col + 2),
              (row - 1, col - 2), (row + 1, col - 2), (row + 1, col + 2)]
-    return format_moves(moves, board)
+    return format_moves(moves, board, player)
 
 
 def rook_moves(board, row, col, player):
@@ -81,12 +81,44 @@ def rook_moves(board, row, col, player):
                 break
             else:
                 break
-    return format_moves(moves, board)
+    return format_moves(moves, board, player)
 
 
-def queen_moves(board, row, col):
-    # TODO: Implement Queen movement
-    pass
+def queen_moves(board, row, col, player):
+    moves = []
+    for i in range(-1, 2, 2):
+        for j in range(-1, 2, 2):
+            cur_row = row
+            cur_col = col
+            while True:
+                cur_row = cur_row + i
+                cur_col = cur_col + j
+                if not (0 <= cur_col <= 7 and 0 <= cur_row <= 7):
+                    break
+                if board[cur_row][cur_col] == 0:
+                    moves.append((cur_row, cur_col))
+                elif player == 0 and board[cur_row][cur_col] < 0 or player == 1 and board[cur_row][cur_col] > 0:
+                    moves.append((cur_row, cur_col))
+                    break
+                else:
+                    break
+    directions = ((-1, 0), (1, 0), (0, -1), (0, 1))
+    for x, y in directions:
+        cur_row = row
+        cur_col = col
+        while True:
+            cur_row = cur_row + x
+            cur_col = cur_col + y
+            if not (0 <= cur_col <= 7 and 0 <= cur_row <= 7):
+                break
+            if board[cur_row][cur_col] == 0:
+                moves.append((cur_row, cur_col))
+            elif player == 0 and board[cur_row][cur_col] < 0 or player == 1 and board[cur_row][cur_col] > 0:
+                moves.append((cur_row, cur_col))
+                break
+            else:
+                break
+    return format_moves(moves, board, player)
 
 
 def king_moves(board, row, col):
