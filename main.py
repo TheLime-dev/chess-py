@@ -46,12 +46,12 @@ def bishop_moves(board, row, col, player):
                     break
                 if board[cur_row][cur_col] == 0:
                     moves.append((cur_row, cur_col))
-                elif player==0 and board[cur_row][cur_col]<0 or player==1 and board[cur_row][cur_col]>0:
+#                elif player==0 and board[cur_row][cur_col]<0 or player==1 and board[cur_row][cur_col]>0:
                     moves.append((cur_row, cur_col))
                     break
                 else:
                     break
-    pass
+    return format_moves(moves)
 
 
 def knight_moves(board, row, col):
@@ -61,8 +61,24 @@ def knight_moves(board, row, col):
 
 
 def rook_moves(board, row, col):
-    # TODO: Implement Rook movement
-    pass
+    directions = ((-1, 0), (1, 0), (0, -1), (0, 1))
+    moves = []
+    for x, y in directions:
+        cur_row = row
+        cur_col = col
+        while True:
+            cur_row = cur_row + x
+            cur_col = cur_col + y
+            if not (0 <= cur_col <= 7 or 0 <= cur_row <= 7):
+                break
+            if board[cur_row][cur_col] == 0:
+                moves.append((cur_row, cur_col))
+#            elif player==0 and board[cur_row][cur_col]<0 or player==1 and board[cur_row][cur_col]>0:
+                moves.append((cur_row, cur_col))
+                break
+            else:
+                break
+    return format_moves(moves)
 
 
 def queen_moves(board, row, col):
