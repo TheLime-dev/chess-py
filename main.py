@@ -33,8 +33,24 @@ def pawn_moves(board, row, col):
     pass
 
 
-def bishop_moves(board, row, col):
-    # TODO: Implement Bishop movement
+def bishop_moves(board, row, col, player):
+    moves = []
+    for i in range(-1, 2, 2):
+        for j in range(-1, 2, 2):
+            cur_row = row
+            cur_col = col
+            while True:
+                cur_row = cur_row + i
+                cur_col = cur_col + j
+                if not (0 <= cur_col <= 7 or 0 <= cur_row <= 7):
+                    break
+                if board[cur_row][cur_col] == 0:
+                    moves.append((cur_row, cur_col))
+                elif player==0 and board[cur_row][cur_col]<0 or player==1 and board[cur_row][cur_col]>0:
+                    moves.append((cur_row, cur_col))
+                    break
+                else:
+                    break
     pass
 
 
@@ -77,7 +93,7 @@ def check_if_legal(board, player, move):
                     if target in pawn_moves(board, row, col):
                         return cur, target
                 elif abs(piece) == 2:
-                    if target in bishop_moves(board, row, col):
+                    if target in bishop_moves(board, row, col, player):
                         return cur, target
                 elif abs(piece) == 3:
                     if target in knight_moves(board, row, col):
