@@ -20,11 +20,14 @@ PIECES = {
 }
 
 
-def format_moves(moves, board):
+def format_moves(moves, board, player):
     formatted_moves = []
     for move in moves:
         if 8 > move[0] > -1 and 8 > move[1] > -1 and board[move[0]][move[1]] == 0:
             formatted_moves.append(BOARD[move[0]][move[1]])
+        elif (8 > move[0] > -1 and 8 > move[1] > -1) and (
+                (player == 0 and board[move[0]][move[1]] < 0) or (player == 1 and board[move[0]][move[1]] > 0)):
+            formatted_moves.append('x'+BOARD[move[0]][move[1]])
     return tuple(formatted_moves)
 
 
@@ -42,16 +45,16 @@ def bishop_moves(board, row, col, player):
             while True:
                 cur_row = cur_row + i
                 cur_col = cur_col + j
-                if not (0 <= cur_col <= 7 or 0 <= cur_row <= 7):
+                if not (0 <= cur_col <= 7 and 0 <= cur_row <= 7):
                     break
                 if board[cur_row][cur_col] == 0:
                     moves.append((cur_row, cur_col))
-#                elif player==0 and board[cur_row][cur_col]<0 or player==1 and board[cur_row][cur_col]>0:
+                elif player == 0 and board[cur_row][cur_col] < 0 or player == 1 and board[cur_row][cur_col] > 0:
                     moves.append((cur_row, cur_col))
                     break
                 else:
                     break
-    return format_moves(moves)
+    return format_moves(moves, board)
 
 
 def knight_moves(board, row, col):
@@ -60,7 +63,7 @@ def knight_moves(board, row, col):
     return format_moves(moves, board)
 
 
-def rook_moves(board, row, col):
+def rook_moves(board, row, col, player):
     directions = ((-1, 0), (1, 0), (0, -1), (0, 1))
     moves = []
     for x, y in directions:
@@ -69,16 +72,16 @@ def rook_moves(board, row, col):
         while True:
             cur_row = cur_row + x
             cur_col = cur_col + y
-            if not (0 <= cur_col <= 7 or 0 <= cur_row <= 7):
+            if not (0 <= cur_col <= 7 and 0 <= cur_row <= 7):
                 break
             if board[cur_row][cur_col] == 0:
                 moves.append((cur_row, cur_col))
-#            elif player==0 and board[cur_row][cur_col]<0 or player==1 and board[cur_row][cur_col]>0:
+            elif player == 0 and board[cur_row][cur_col] < 0 or player == 1 and board[cur_row][cur_col] > 0:
                 moves.append((cur_row, cur_col))
                 break
             else:
                 break
-    return format_moves(moves)
+    return format_moves(moves, board)
 
 
 def queen_moves(board, row, col):
@@ -100,7 +103,6 @@ def check_if_legal(board, player, move):
         piece = PIECES[move[0]]
     if player == 1:
         piece = -piece
-    moves = []
     for row, line in enumerate(board):
         for col, square in enumerate(line):
             cur = BOARD[row][col]
@@ -115,7 +117,7 @@ def check_if_legal(board, player, move):
                     if target in knight_moves(board, row, col):
                         return cur, target
                 elif abs(piece) == 4:
-                    if target in rook_moves(board, row, col):
+                    if target in rook_moves(board, row, col, player):
                         return cur, target
                 elif abs(piece) == 5:
                     if target in queen_moves(board, row, col):
@@ -123,8 +125,7 @@ def check_if_legal(board, player, move):
                 elif abs(piece) == 6:
                     if target in king_moves(board, row, col):
                         return cur, target
-
-    return tuple(moves)
+    return False
 
 
 def main():
