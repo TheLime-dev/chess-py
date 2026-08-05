@@ -31,7 +31,7 @@ def format_moves(moves, board, player):
     return tuple(formatted_moves)
 
 
-def pawn_moves(board, row, col):
+def pawn_moves(board, row, col, player):
     # TODO: Implement Pawn movement
     pass
 
@@ -140,13 +140,13 @@ def check_if_legal(board, player, move):
             cur = BOARD[row][col]
             if square == piece:
                 if abs(piece) == 1:
-                    if target in pawn_moves(board, row, col):
+                    if target in pawn_moves(board, row, col, player):
                         return cur, target
                 elif abs(piece) == 2:
                     if target in bishop_moves(board, row, col, player):
                         return cur, target
                 elif abs(piece) == 3:
-                    if target in knight_moves(board, row, col):
+                    if target in knight_moves(board, row, col, player):
                         return cur, target
                 elif abs(piece) == 4:
                     if target in rook_moves(board, row, col, player):
@@ -159,6 +159,13 @@ def check_if_legal(board, player, move):
                         return cur, target
     return False
 
+def print_board(board):
+    for row in board:
+        for col in row:
+            if col >= 0:
+                print(" ", end="")
+            print(col, end=' ')
+        print()
 
 def main():
     """
@@ -185,7 +192,7 @@ def main():
     count = 0
     while not game_over:
         count += 1
-        print(board)
+        print_board(board)
         move = input("Enter move: ")
         check_if_legal(board, cur_turn, move)
 
