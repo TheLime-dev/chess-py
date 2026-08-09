@@ -20,6 +20,14 @@ PIECES = {
 }
 
 
+def name_to_nums(square):
+    row, col = 0, 0
+    for cur_row, i in enumerate(BOARD):
+        for cur_col, j in enumerate(i):
+            if j == square:
+                row, col = cur_row, cur_col
+    return row, col
+
 def format_moves(moves, board, player):
     formatted_moves = []
     for move in moves:
@@ -27,7 +35,7 @@ def format_moves(moves, board, player):
             formatted_moves.append(BOARD[move[0]][move[1]])
         elif (8 > move[0] > -1 and 8 > move[1] > -1) and (
                 (player == 0 and board[move[0]][move[1]] < 0) or (player == 1 and board[move[0]][move[1]] > 0)):
-            formatted_moves.append('x'+BOARD[move[0]][move[1]])
+            formatted_moves.append('x' + BOARD[move[0]][move[1]])
     return tuple(formatted_moves)
 
 
@@ -141,23 +149,34 @@ def check_if_legal(board, player, move):
             if square == piece:
                 if abs(piece) == 1:
                     if target in pawn_moves(board, row, col, player):
-                        return cur, target
+                        return True, cur, target
                 elif abs(piece) == 2:
                     if target in bishop_moves(board, row, col, player):
-                        return cur, target
+                        return True, cur, target
                 elif abs(piece) == 3:
                     if target in knight_moves(board, row, col, player):
-                        return cur, target
+                        return True, cur, target
                 elif abs(piece) == 4:
                     if target in rook_moves(board, row, col, player):
-                        return cur, target
+                        return True, cur, target
                 elif abs(piece) == 5:
                     if target in queen_moves(board, row, col):
-                        return cur, target
+                        return True, cur, target
                 elif abs(piece) == 6:
                     if target in king_moves(board, row, col):
-                        return cur, target
-    return False
+                        return True, cur, target
+    return False, None, None
+
+
+def make_move(board, cur, target):
+    row, col = name_to_nums(cur)
+    piece = board[row][col]
+    board[row][col] = 0
+    row, col = name_to_nums(target)
+    board[row][col] = piece
+    return board
+
+
 
 def print_board(board):
     for row in board:
@@ -166,6 +185,7 @@ def print_board(board):
                 print(" ", end="")
             print(col, end=' ')
         print()
+
 
 def main():
     """
@@ -194,9 +214,12 @@ def main():
         count += 1
         print_board(board)
         move = input("Enter move: ")
-        check_if_legal(board, cur_turn, move)
-
-        cur_turn = not cur_turn
+        legal, starting_square, target = check_if_legal(board, cur_turn, move)
+        if legal:
+            board = make_move(board, starting_square, target)
+            cur_turn = int(not cur_turn)
+        else:
+            print('Invalid move')
 
 
 if __name__ == '__main__':
