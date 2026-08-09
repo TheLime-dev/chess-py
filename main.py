@@ -28,6 +28,7 @@ def name_to_nums(square):
                 row, col = cur_row, cur_col
     return row, col
 
+
 def format_moves(moves, board, player):
     formatted_moves = []
     for move in moves:
@@ -40,8 +41,28 @@ def format_moves(moves, board, player):
 
 
 def pawn_moves(board, row, col, player):
-    # TODO: Implement Pawn movement
-    pass
+    moves = []
+    if player == 0:
+        if board[row + 1][col] == 0:
+            moves.append((row + 1, col))
+            if row == 1 and board[row + 2][col] == 0:
+                moves.append((row + 2, col))
+        if col < 7 and board[row + 1][col + 1] < 0:
+            moves.append((row + 1, col + 1))
+        if col > 0 and board[row + 1][col - 1] < 0:
+            moves.append((row + 1, col - 1))
+    elif player == 1:
+        if board[row - 1][col] == 0:
+            moves.append((row - 1, col))
+            if row == 6 and board[row - 2][col] == 0:
+                moves.append((row - 2, col))
+        if col < 7 and board[row - 1][col + 1] > 0:
+            moves.append((row - 1, col + 1))
+        if col > 0 and board[row - 1][col - 1] > 0:
+            moves.append((row - 1, col - 1))
+
+    # TODO: Implement en passant
+    return format_moves(moves, board, player)
 
 
 def bishop_moves(board, row, col, player):
@@ -110,6 +131,7 @@ def queen_moves(board, row, col, player):
                     break
                 else:
                     break
+                    
     directions = ((-1, 0), (1, 0), (0, -1), (0, 1))
     for x, y in directions:
         cur_row = row
@@ -129,16 +151,18 @@ def queen_moves(board, row, col, player):
     return format_moves(moves, board, player)
 
 
-def king_moves(board, row, col):
+def king_moves(board, row, col, player):
     moves = [(row, col + 1), (row, col - 1), (row + 1, col), (row - 1, col), (row - 1, col - 1),
              (row - 1, col + 1), (row + 1, col - 1), (row + 1, col + 1)]
-    return format_moves(moves, board)
+    return format_moves(moves, board, player)
 
 
 def check_if_legal(board, player, move):
     target = move[-2:]
     if move[0] not in PIECES:
         piece = 1
+        if move[0] != 'x':
+            target = move
     else:
         piece = PIECES[move[0]]
     if player == 1:
@@ -148,22 +172,22 @@ def check_if_legal(board, player, move):
             cur = BOARD[row][col]
             if square == piece:
                 if abs(piece) == 1:
-                    if target in pawn_moves(board, row, col, player):
+                    if move in pawn_moves(board, row, col, player):
                         return True, cur, target
                 elif abs(piece) == 2:
-                    if target in bishop_moves(board, row, col, player):
+                    if move[1:] in bishop_moves(board, row, col, player):
                         return True, cur, target
                 elif abs(piece) == 3:
-                    if target in knight_moves(board, row, col, player):
+                    if move[1:] in knight_moves(board, row, col, player):
                         return True, cur, target
                 elif abs(piece) == 4:
-                    if target in rook_moves(board, row, col, player):
+                    if move[1:] in rook_moves(board, row, col, player):
                         return True, cur, target
                 elif abs(piece) == 5:
-                    if target in queen_moves(board, row, col):
+                    if move[1:] in queen_moves(board, row, col, player):
                         return True, cur, target
                 elif abs(piece) == 6:
-                    if target in king_moves(board, row, col):
+                    if move[1:] in king_moves(board, row, col, player):
                         return True, cur, target
     return False, None, None
 
@@ -177,10 +201,9 @@ def make_move(board, cur, target):
     return board
 
 
-
 def print_board(board):
-    for row in board:
-        for col in row:
+    for i in range(7, -1, -1):
+        for col in board[i]:
             if col >= 0:
                 print(" ", end="")
             print(col, end=' ')
