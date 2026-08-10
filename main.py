@@ -131,7 +131,7 @@ def queen_moves(board, row, col, player):
                     break
                 else:
                     break
-                    
+
     directions = ((-1, 0), (1, 0), (0, -1), (0, 1))
     for x, y in directions:
         cur_row = row
@@ -154,6 +154,7 @@ def queen_moves(board, row, col, player):
 def king_moves(board, row, col, player):
     moves = [(row, col + 1), (row, col - 1), (row + 1, col), (row - 1, col), (row - 1, col - 1),
              (row - 1, col + 1), (row + 1, col - 1), (row + 1, col + 1)]
+    # TODO: Add castling
     return format_moves(moves, board, player)
 
 
@@ -189,61 +190,53 @@ def check_if_legal(board, player, move):
                 elif abs(piece) == 6:
                     if move[1:] in king_moves(board, row, col, player):
                         return True, cur, target
+    # TODO: Add Check and Checkmate
     return False, None, None
 
 
-def make_move(board, cur, target):
-    row, col = name_to_nums(cur)
-    piece = board[row][col]
-    board[row][col] = 0
-    row, col = name_to_nums(target)
-    board[row][col] = piece
-    return board
+class Game:
+    def __init__(self):
+        self.board = [[4, 3, 2, 6, 5, 2, 3, 4],
+                      [1, 1, 1, 1, 1, 1, 1, 1],
+                      [0, 0, 0, 0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0, 0, 0, 0],
+                      [-1, -1, -1, -1, -1, -1, -1, -1],
+                      [-4, -3, -2, -6, -5, -2, -3, -4]]
+        """
+        0: empty square
+        1: pawn
+        2: bishop
+        3: knight
+        4: rook
+        5: queen
+        6: king
+        -: black
+        +: white
+        """
+        self.turn = 0  # 0: white, 1: black
 
+    def make_move(self, cur, target):
+        row, col = name_to_nums(cur)
+        piece = self.board[row][col]
+        self.board[row][col] = 0
+        row, col = name_to_nums(target)
+        self.board[row][col] = piece
 
-def print_board(board):
-    for i in range(7, -1, -1):
-        for col in board[i]:
-            if col >= 0:
-                print(" ", end="")
-            print(col, end=' ')
-        print()
+    def print_board(self):
+        for i in range(7, -1, -1):
+            for col in self.board[i]:
+                if col >= 0:
+                    print(" ", end="")
+                print(col, end=' ')
+            print()
 
-
-def main():
-    """
-    0: empty square
-    1: pawn
-    2: bishop
-    3: knight
-    4: rook
-    5: queen
-    6: king
-    -: black
-    +: white
-    """
-    board = [[4, 3, 2, 6, 5, 2, 3, 4],
-             [1, 1, 1, 1, 1, 1, 1, 1],
-             [0, 0, 0, 0, 0, 0, 0, 0],
-             [0, 0, 0, 0, 0, 0, 0, 0],
-             [0, 0, 0, 0, 0, 0, 0, 0],
-             [0, 0, 0, 0, 0, 0, 0, 0],
-             [-1, -1, -1, -1, -1, -1, -1, -1],
-             [-4, -3, -2, -6, -5, -2, -3, -4]]
-    game_over = False
-    cur_turn = 0  # 0: white, 1: black
-    count = 0
-    while not game_over:
-        count += 1
-        print_board(board)
-        move = input("Enter move: ")
-        legal, starting_square, target = check_if_legal(board, cur_turn, move)
+    def move(self, move):
+        legal, starting_square, target = check_if_legal(self.board, self.turn, move)
         if legal:
-            board = make_move(board, starting_square, target)
-            cur_turn = int(not cur_turn)
-        else:
-            print('Invalid move')
+            self.make_move(starting_square, target)
+            self.turn = int(not self.turn)
+            return True
 
-
-if __name__ == '__main__':
-    main()
+        return False
