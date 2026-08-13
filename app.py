@@ -17,5 +17,9 @@ def get_board():
     return jsonify(game.board)
 
 
+@app.route('/turn')
+def get_turn():
+    return jsonify(game.turn)
+
 if __name__ == '__main__':
     app.run(debug=True)

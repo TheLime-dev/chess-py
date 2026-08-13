@@ -1,5 +1,3 @@
-# import pygame
-
 BOARD = (
     ("a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1"),
     ("a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2"),
@@ -114,41 +112,7 @@ def rook_moves(board, row, col, player):
 
 
 def queen_moves(board, row, col, player):
-    moves = []
-    for i in range(-1, 2, 2):
-        for j in range(-1, 2, 2):
-            cur_row = row
-            cur_col = col
-            while True:
-                cur_row = cur_row + i
-                cur_col = cur_col + j
-                if not (0 <= cur_col <= 7 and 0 <= cur_row <= 7):
-                    break
-                if board[cur_row][cur_col] == 0:
-                    moves.append((cur_row, cur_col))
-                elif player == 0 and board[cur_row][cur_col] < 0 or player == 1 and board[cur_row][cur_col] > 0:
-                    moves.append((cur_row, cur_col))
-                    break
-                else:
-                    break
-
-    directions = ((-1, 0), (1, 0), (0, -1), (0, 1))
-    for x, y in directions:
-        cur_row = row
-        cur_col = col
-        while True:
-            cur_row = cur_row + x
-            cur_col = cur_col + y
-            if not (0 <= cur_col <= 7 and 0 <= cur_row <= 7):
-                break
-            if board[cur_row][cur_col] == 0:
-                moves.append((cur_row, cur_col))
-            elif player == 0 and board[cur_row][cur_col] < 0 or player == 1 and board[cur_row][cur_col] > 0:
-                moves.append((cur_row, cur_col))
-                break
-            else:
-                break
-    return format_moves(moves, board, player)
+    return rook_moves(board, row, col, player) + bishop_moves(board, row, col, player)
 
 
 def king_moves(board, row, col, player):
