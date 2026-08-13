@@ -54,6 +54,7 @@
     margin-left: 40px;
     position: absolute;
     display: grid;
+    z-index: 3;
     grid-template-rows: repeat(8, 80px);
     font-size: 18px;
     font-family: sans-serif;
@@ -65,6 +66,7 @@
     margin-left: 110px;
     margin-top: 660px;
     position: absolute;
+    z-index: 3;
     grid-template-columns: repeat(8, 80px);
     font-size: 18px;
     font-family: sans-serif;
