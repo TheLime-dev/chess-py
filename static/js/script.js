@@ -129,17 +129,22 @@ async function showPieces() {
 }
 
 
+async function showMoves(){
+    const movesResponse = await fetch('/moves');
+    let moves = await movesResponse.json();
+
+}
+
 // send piece to python
 function makeMove(starting, target) {
     let move = '';
     if (pieces[Math.abs(board[selectedPosition['row']][selectedPosition['col']])] !== 'p'){ // if not a pawn
-        move = pieces[Math.abs(board[selectedPosition['row']][selectedPosition['col']])].toLocaleUpperCase(); // let the move be the selected piece // TODO: make it uppercase
+        move = pieces[Math.abs(board[selectedPosition['row']][selectedPosition['col']])].toLocaleUpperCase(); // let the move be the selected piece
     }
     if (board[target['row']][target['col']] !== 0){
         move += 'x';
     }
     move += BOARD[7-target['row']][target['col']]
-    console.log(move);
     fetch('/move',{
         method: 'POST',
         headers: {
@@ -148,7 +153,7 @@ function makeMove(starting, target) {
         body: JSON.stringify({
                 move: move
             })
-    }).then(showPieces());
+    }).then(showPieces().then(showMoves()));
 
 
 }

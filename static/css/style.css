@@ -17,6 +17,11 @@
     grid-template-rows: repeat(8, 1fr);
 }
 
+#moves {
+    border-width: 2px;
+    border-color: black;
+}
+
 .square {
     width: 80px;
     height: 80px;

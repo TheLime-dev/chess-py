@@ -21,6 +21,10 @@ def get_board():
 def get_turn():
     return jsonify(game.turn)
 
+@app.route('/moves')
+def get_moves():
+    return jsonify(game.moves)
+
 @app.post('/move')
 def move():
     data = request.get_json()

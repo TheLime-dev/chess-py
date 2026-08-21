@@ -1,3 +1,5 @@
+import copy
+
 BOARD = (
     ("a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1"),
     ("a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2"),
@@ -59,7 +61,7 @@ def pawn_moves(board, row, col, player):
         if col > 0 and board[row - 1][col - 1] > 0:
             moves.append((row - 1, col - 1))
 
-    # TODO: Implement en passant
+    # TODO: Implement en passant 4
     return format_moves(moves, board, player)
 
 
@@ -118,44 +120,61 @@ def queen_moves(board, row, col, player):
 def king_moves(board, row, col, player):
     moves = [(row, col + 1), (row, col - 1), (row + 1, col), (row - 1, col), (row - 1, col - 1),
              (row - 1, col + 1), (row + 1, col - 1), (row + 1, col + 1)]
-    # TODO: Add castling
+    # TODO: Add castling 5
     return format_moves(moves, board, player)
 
 
-def check_if_legal(board, player, move):
-    target = move[-2:]
-    if move[0] not in PIECES:
-        piece = 1
-        if move[0] != 'x':
-            target = move
-    else:
-        piece = PIECES[move[0]]
-    if player == 1:
-        piece = -piece
+def check(board, player):
+    # TODO: Implement check for checks 3
+    return False
+
+def find_moves(board, player): # finds every square where a piece can move to
+    moves = []
     for row, line in enumerate(board):
         for col, square in enumerate(line):
             cur = BOARD[row][col]
-            if square == piece:
-                if abs(piece) == 1:
-                    if move in pawn_moves(board, row, col, player):
-                        return True, cur, target
-                elif abs(piece) == 2:
-                    if move[1:] in bishop_moves(board, row, col, player):
-                        return True, cur, target
-                elif abs(piece) == 3:
-                    if move[1:] in knight_moves(board, row, col, player):
-                        return True, cur, target
-                elif abs(piece) == 4:
-                    if move[1:] in rook_moves(board, row, col, player):
-                        return True, cur, target
-                elif abs(piece) == 5:
-                    if move[1:] in queen_moves(board, row, col, player):
-                        return True, cur, target
-                elif abs(piece) == 6:
-                    if move[1:] in king_moves(board, row, col, player):
-                        return True, cur, target
-    # TODO: Add Check and Checkmate
-    return False, None, None
+            if abs(square) == 1:
+                for val in pawn_moves(board, row, col, player):
+                    moves.append((cur, val))
+            elif abs(square) == 2:
+                for val in bishop_moves(board, row, col, player):
+                    moves.append((cur, 'B' + val))
+            elif abs(square) == 3:
+                for val in knight_moves(board, row, col, player):
+                    moves.append((cur, 'N' + val))
+            elif abs(square) == 4:
+                for val in rook_moves(board, row, col, player):
+                    moves.append((cur, 'R' + val))
+            elif abs(square) == 5:
+                for val in queen_moves(board, row, col, player):
+                    moves.append((cur, 'Q' + val))
+            elif abs(square) == 6:
+                for val in king_moves(board, row, col, player):
+                    moves.append((cur, 'K' + val))
+    return moves
+
+def find_legal_moves(board, player):
+    moves = []
+    for val in find_moves(board, player):
+        start, move = val
+        temp_board = copy.deepcopy(board)
+        # TODO: Make the move on the temp board 2
+        if not check(temp_board, player):
+            moves.append((start,move))
+    if moves:
+        return moves
+    else:
+        return None # Checkmate/Stalemate
+
+
+def check_if_legal(board, player, move):
+    legal_moves = find_legal_moves(board, player)
+    if legal_moves:
+        for val in legal_moves:
+            start, possible_move = val
+            if possible_move == move:
+                return True, start
+    return False, None
 
 
 class Game:
@@ -180,6 +199,8 @@ class Game:
         +: white
         """
         self.turn = 0  # 0: white, 1: black
+        self.moves = []
+        self.turns = 0
 
     def make_move(self, cur, target):
         row, col = name_to_nums(cur)
@@ -188,7 +209,7 @@ class Game:
         row, col = name_to_nums(target)
         self.board[row][col] = piece
 
-    def print_board(self):
+    def print_board(self): # only for debugging purposes
         for i in range(7, -1, -1):
             for col in self.board[i]:
                 if col >= 0:
@@ -197,9 +218,15 @@ class Game:
             print()
 
     def move(self, move):
-        legal, starting_square, target = check_if_legal(self.board, self.turn, move)
+        target = move[-2:]
+        legal, start = check_if_legal(self.board, self.turn, move)
         if legal:
-            self.make_move(starting_square, target)
+            self.make_move(start, target)
+            if self.turn == 0:
+                self.moves.append(move)
+            else:
+                self.moves.append([self.moves.pop(), move])
+            self.turns += 1
             self.turn = int(not self.turn)
             return True
 
