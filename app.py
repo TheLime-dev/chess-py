@@ -14,7 +14,7 @@ def index():
 
 @app.route('/board')
 def get_board():
-    return jsonify(game.board)
+    return jsonify(game.board.position)
 
 
 @app.route('/turn')

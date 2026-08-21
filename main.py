@@ -31,32 +31,29 @@ def name_to_nums(square):
 
 class Board:
     def __init__(self):
-        self.board = [[4, 3, 2, 6, 5, 2, 3, 4],
-                      [1, 1, 1, 1, 1, 1, 1, 1],
-                      [0, 0, 0, 0, 0, 0, 0, 0],
-                      [0, 0, 0, 0, 0, 0, 0, 0],
-                      [0, 0, 0, 0, 0, 0, 0, 0],
-                      [0, 0, 0, 0, 0, 0, 0, 0],
-                      [-1, -1, -1, -1, -1, -1, -1, -1],
-                      [-4, -3, -2, -6, -5, -2, -3, -4]]
+        self.position = [[4, 3, 2, 6, 5, 2, 3, 4],
+                         [1, 1, 1, 1, 1, 1, 1, 1],
+                         [0, 0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0, 0],
+                         [-1, -1, -1, -1, -1, -1, -1, -1],
+                         [-4, -3, -2, -6, -5, -2, -3, -4]]
 
     def make_move(self, cur, target):
         row, col = name_to_nums(cur)
-        piece = self.board[row][col]
-        self.board[row][col] = 0
+        piece = self.position[row][col]
+        self.position[row][col] = 0
         row, col = name_to_nums(target)
-        self.board[row][col] = piece
+        self.position[row][col] = piece
 
-    def print_board(self): # only for debugging purposes
+    def print_board(self):  # only for debugging purposes
         for i in range(7, -1, -1):
-            for col in self.board[i]:
+            for col in self.position[i]:
                 if col >= 0:
                     print(" ", end="")
                 print(col, end=' ')
             print()
-
-    def change_board(self, new_board):
-        self.board = new_board
 
 
 def format_moves(moves, board, player):
@@ -158,7 +155,8 @@ def check(board, player):
     # TODO: Implement check for checks 3
     return False
 
-def find_moves(board, player): # finds every square where a piece can move to (not considering checks)
+
+def find_moves(board, player):  # finds every square where a piece can move to (not considering checks)
     moves = []
     for row, line in enumerate(board):
         for col, square in enumerate(line):
@@ -183,18 +181,20 @@ def find_moves(board, player): # finds every square where a piece can move to (n
                     moves.append((cur, 'K' + val))
     return moves
 
+
 def find_legal_moves(board, player):
     moves = []
     for val in find_moves(board, player):
         start, move = val
-        temp_board = copy.deepcopy(board)
-        # TODO: Make the move on the temp board 2
-        if not check(temp_board, player):
-            moves.append((start,move))
+        temp_board = Board()
+        temp_board.position = copy.deepcopy(board)
+        temp_board.make_move(start, move[-2:])
+        if not check(temp_board.position, player):
+            moves.append((start, move))
     if moves:
         return moves
     else:
-        return None # Checkmate/Stalemate
+        return None  # Checkmate/Stalemate
 
 
 def check_if_legal(board, player, move):
@@ -227,7 +227,7 @@ class Game:
 
     def move(self, move):
         target = move[-2:]
-        legal, start = check_if_legal(self.board, self.turn, move)
+        legal, start = check_if_legal(self.board.position, self.turn, move)
         if legal:
             self.board.make_move(start, target)
             if self.turn == 0:
