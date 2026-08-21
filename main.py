@@ -31,14 +31,14 @@ def name_to_nums(square):
 
 class Board:
     def __init__(self):
-        self.position = [[4, 3, 2, 6, 5, 2, 3, 4],
+        self.position = [[4, 3, 2, 5, 6, 2, 3, 4],
                          [1, 1, 1, 1, 1, 1, 1, 1],
                          [0, 0, 0, 0, 0, 0, 0, 0],
                          [0, 0, 0, 0, 0, 0, 0, 0],
                          [0, 0, 0, 0, 0, 0, 0, 0],
                          [0, 0, 0, 0, 0, 0, 0, 0],
                          [-1, -1, -1, -1, -1, -1, -1, -1],
-                         [-4, -3, -2, -6, -5, -2, -3, -4]]
+                         [-4, -3, -2, -5, -6, -2, -3, -4]]
 
     def make_move(self, cur, target):
         row, col = name_to_nums(cur)
@@ -92,6 +92,7 @@ def pawn_moves(board, row, col, player):
     return format_moves(moves, board, player)
 
 
+# noinspection DuplicatedCode
 def bishop_moves(board, row, col, player):
     moves = []
     for i in range(-1, 2, 2):
@@ -119,6 +120,7 @@ def knight_moves(board, row, col, player):
     return format_moves(moves, board, player)
 
 
+# noinspection DuplicatedCode
 def rook_moves(board, row, col, player):
     directions = ((-1, 0), (1, 0), (0, -1), (0, 1))
     moves = []
@@ -151,8 +153,21 @@ def king_moves(board, row, col, player):
     return format_moves(moves, board, player)
 
 
+############################################
+
 def check(board, player):
-    # TODO: Implement check for checks 3
+    king_pos = ''
+    for row, line in enumerate(board):
+        for col, square in enumerate(line):
+            if square == 6 and player == 0:
+                king_pos = BOARD[row][col]
+            elif square == -6 and player == 1:
+                king_pos = BOARD[row][col]
+    possible_moves = find_moves(board, int(not player))
+    for move in possible_moves:
+        print(move)
+        if move[1][-2:] == king_pos:
+            return True
     return False
 
 
@@ -161,22 +176,22 @@ def find_moves(board, player):  # finds every square where a piece can move to (
     for row, line in enumerate(board):
         for col, square in enumerate(line):
             cur = BOARD[row][col]
-            if abs(square) == 1:
+            if square == 1 and player == 0 or square == -1 and player == 1:
                 for val in pawn_moves(board, row, col, player):
                     moves.append((cur, val))
-            elif abs(square) == 2:
+            elif square == 2 and player == 0 or square == -2 and player == 1:
                 for val in bishop_moves(board, row, col, player):
                     moves.append((cur, 'B' + val))
-            elif abs(square) == 3:
+            elif square == 3 and player == 0 or square == -3 and player == 1:
                 for val in knight_moves(board, row, col, player):
                     moves.append((cur, 'N' + val))
-            elif abs(square) == 4:
+            elif square == 4 and player == 0 or square == -4 and player == 1:
                 for val in rook_moves(board, row, col, player):
                     moves.append((cur, 'R' + val))
-            elif abs(square) == 5:
+            elif square == 5 and player == 0 or square == -5 and player == 1:
                 for val in queen_moves(board, row, col, player):
                     moves.append((cur, 'Q' + val))
-            elif abs(square) == 6:
+            elif square == 6 and player == 0 or square == -6 and player == 1:
                 for val in king_moves(board, row, col, player):
                     moves.append((cur, 'K' + val))
     return moves
