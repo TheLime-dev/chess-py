@@ -29,6 +29,36 @@ def name_to_nums(square):
     return row, col
 
 
+class Board:
+    def __init__(self):
+        self.board = [[4, 3, 2, 6, 5, 2, 3, 4],
+                      [1, 1, 1, 1, 1, 1, 1, 1],
+                      [0, 0, 0, 0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0, 0, 0, 0],
+                      [-1, -1, -1, -1, -1, -1, -1, -1],
+                      [-4, -3, -2, -6, -5, -2, -3, -4]]
+
+    def make_move(self, cur, target):
+        row, col = name_to_nums(cur)
+        piece = self.board[row][col]
+        self.board[row][col] = 0
+        row, col = name_to_nums(target)
+        self.board[row][col] = piece
+
+    def print_board(self): # only for debugging purposes
+        for i in range(7, -1, -1):
+            for col in self.board[i]:
+                if col >= 0:
+                    print(" ", end="")
+                print(col, end=' ')
+            print()
+
+    def change_board(self, new_board):
+        self.board = new_board
+
+
 def format_moves(moves, board, player):
     formatted_moves = []
     for move in moves:
@@ -128,7 +158,7 @@ def check(board, player):
     # TODO: Implement check for checks 3
     return False
 
-def find_moves(board, player): # finds every square where a piece can move to
+def find_moves(board, player): # finds every square where a piece can move to (not considering checks)
     moves = []
     for row, line in enumerate(board):
         for col, square in enumerate(line):
@@ -179,14 +209,7 @@ def check_if_legal(board, player, move):
 
 class Game:
     def __init__(self):
-        self.board = [[4, 3, 2, 6, 5, 2, 3, 4],
-                      [1, 1, 1, 1, 1, 1, 1, 1],
-                      [0, 0, 0, 0, 0, 0, 0, 0],
-                      [0, 0, 0, 0, 0, 0, 0, 0],
-                      [0, 0, 0, 0, 0, 0, 0, 0],
-                      [0, 0, 0, 0, 0, 0, 0, 0],
-                      [-1, -1, -1, -1, -1, -1, -1, -1],
-                      [-4, -3, -2, -6, -5, -2, -3, -4]]
+        self.board = Board()
         """
         0: empty square
         1: pawn
@@ -202,26 +225,11 @@ class Game:
         self.moves = []
         self.turns = 0
 
-    def make_move(self, cur, target):
-        row, col = name_to_nums(cur)
-        piece = self.board[row][col]
-        self.board[row][col] = 0
-        row, col = name_to_nums(target)
-        self.board[row][col] = piece
-
-    def print_board(self): # only for debugging purposes
-        for i in range(7, -1, -1):
-            for col in self.board[i]:
-                if col >= 0:
-                    print(" ", end="")
-                print(col, end=' ')
-            print()
-
     def move(self, move):
         target = move[-2:]
         legal, start = check_if_legal(self.board, self.turn, move)
         if legal:
-            self.make_move(start, target)
+            self.board.make_move(start, target)
             if self.turn == 0:
                 self.moves.append(move)
             else:
