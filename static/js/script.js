@@ -1,6 +1,6 @@
 const boardElement = document.getElementById("chessboard");
-const filelabels = document.getElementById("file-labels");
-const ranklabels = document.getElementById("rank-labels");
+const fileLabels = document.getElementById("file-labels");
+const rankLabels = document.getElementById("rank-labels");
 
 const BOARD = [["a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8"], ["a7", "b7", "c7", "d7", "e7", "f7", "g7", "h7"], ["a6", "b6", "c6", "d6", "e6", "f6", "g6", "h6"], ["a5", "b5", "c5", "d5", "e5", "f5", "g5", "h5"], ["a4", "b4", "c4", "d4", "e4", "f4", "g4", "h4"], ["a3", "b3", "c3", "d3", "e3", "f3", "g3", "h3"], ["a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2"], ["a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1"],];
 
@@ -85,7 +85,7 @@ for (let row = 0; row < 8; row++) {
 for (let row = 0; row < 8; row++) {
     const number = document.createElement("div");
     number.textContent = 8 - row;
-    ranklabels.appendChild(number);
+    rankLabels.appendChild(number);
 }
 
 
@@ -94,7 +94,7 @@ for (let row = 0; row < 8; row++) {
 for (const file of files) {
     const letter = document.createElement("div");
     letter.textContent = file;
-    filelabels.appendChild(letter);
+    fileLabels.appendChild(letter);
 }
 
 // display pieces
@@ -102,6 +102,8 @@ for (const file of files) {
 async function showPieces() {
     const boardResponse = await fetch('/board');
     board = await boardResponse.json();
+    const turnResponse = await fetch('/turn');
+    curTurn = await turnResponse.json();
 
     const squares = boardElement.querySelectorAll(".square");
 
@@ -126,10 +128,28 @@ async function showPieces() {
 
 }
 
-function makeMove(starting, target) {
 
-//    const piece = pieces[Math.abs(board[7 - row][col])].upper();
-    showPieces();
+// send piece to python
+function makeMove(starting, target) {
+    let move = '';
+    if (pieces[Math.abs(board[selectedPosition['row']][selectedPosition['col']])] !== 'p'){ // if not a pawn
+        move = pieces[Math.abs(board[selectedPosition['row']][selectedPosition['col']])].toLocaleUpperCase(); // let the move be the selected piece // TODO: make it uppercase
+    }
+    if (board[target['row']][target['col']] !== 0){
+        move += 'x';
+    }
+    move += BOARD[7-target['row']][target['col']]
+    console.log(move);
+    fetch('/move',{
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+                move: move
+            })
+    }).then(showPieces());
+
 
 }
 
