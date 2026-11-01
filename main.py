@@ -78,6 +78,7 @@ def pawn_moves(board, row, col, player):
             moves.append((row + 1, col + 1))
         if col > 0 and board[row + 1][col - 1] < 0:
             moves.append((row + 1, col - 1))
+
     elif player == 1:
         if board[row - 1][col] == 0:
             moves.append((row - 1, col))
@@ -88,7 +89,7 @@ def pawn_moves(board, row, col, player):
         if col > 0 and board[row - 1][col - 1] > 0:
             moves.append((row - 1, col - 1))
 
-    # TODO: Implement en passant 4
+    # TODO: en passant
     return format_moves(moves, board, player)
 
 
@@ -149,7 +150,7 @@ def queen_moves(board, row, col, player):
 def king_moves(board, row, col, player):
     moves = [(row, col + 1), (row, col - 1), (row + 1, col), (row - 1, col), (row - 1, col - 1),
              (row - 1, col + 1), (row + 1, col - 1), (row + 1, col + 1)]
-    # TODO: Add castling 5
+    # TODO: Add castling
     return format_moves(moves, board, player)
 
 
@@ -165,7 +166,6 @@ def check(board, player):
                 king_pos = BOARD[row][col]
     possible_moves = find_moves(board, int(not player))
     for move in possible_moves:
-        print(move)
         if move[1][-2:] == king_pos:
             return True
     return False
@@ -237,8 +237,9 @@ class Game:
         +: white
         """
         self.turn = 0  # 0: white, 1: black
-        self.moves = []
+        self.made_moves = []
         self.turns = 0
+        self.en_passant = None
 
     def move(self, move):
         target = move[-2:]
@@ -246,11 +247,13 @@ class Game:
         if legal:
             self.board.make_move(start, target)
             if self.turn == 0:
-                self.moves.append(move)
+                self.made_moves.append(move)
             else:
-                self.moves.append([self.moves.pop(), move])
+                self.made_moves.append([self.made_moves.pop(), move])
             self.turns += 1
             self.turn = int(not self.turn)
             return True
 
         return False
+
+# TODO: Implement Checkmate/Stalemate
