@@ -84,7 +84,7 @@ for (let row = 0; row < 8; row++) {
 //rank labels
 for (let row = 0; row < 8; row++) {
     const number = document.createElement("div");
-    number.textContent = 8 - row;
+    number.textContent = toString(8 - row);
     rankLabels.appendChild(number);
 }
 
@@ -129,7 +129,7 @@ async function showPieces() {
 }
 
 
-async function showMoves(){
+async function showMoves() {
     const movesResponse = await fetch('/moves');
     let moves = await movesResponse.json();
 
@@ -138,22 +138,22 @@ async function showMoves(){
 // send piece to python
 function makeMove(starting, target) {
     let move = '';
-    if (pieces[Math.abs(board[selectedPosition['row']][selectedPosition['col']])] !== 'p'){ // if not a pawn
-        move = pieces[Math.abs(board[selectedPosition['row']][selectedPosition['col']])].toLocaleUpperCase(); // let the move be the selected piece
+    if (pieces[Math.abs(board[selectedPosition['row']][selectedPosition['col']])] !== 'p') { // if not a pawn
+        move = pieces[Math.abs(board[selectedPosition['row']][selectedPosition['col']])].toUpperCase(); // let the move be the selected piece
     }
-    if (board[target['row']][target['col']] !== 0){
+    if (board[target['row']][target['col']] !== 0) {
         move += 'x';
     }
-    move += BOARD[7-target['row']][target['col']]
-    fetch('/move',{
+    move += BOARD[7 - target['row']][target['col']]
+    fetch('/move', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-                move: move
-            })
-    }).then(showPieces().then(showMoves()));
+            move: move
+        })
+    }).then(showPieces());
 
 
 }

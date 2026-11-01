@@ -21,9 +21,11 @@ def get_board():
 def get_turn():
     return jsonify(game.turn)
 
+
 @app.route('/moves')
 def get_moves():
-    return jsonify(game.moves)
+    return jsonify(game.made_moves)
+
 
 @app.post('/move')
 def move():
@@ -31,11 +33,11 @@ def move():
     player_move = data['move']
     if game.move(player_move):
         return jsonify({
-            'ok' : True
+            'ok': True
         })
     else:
         return jsonify({
-            'ok' : False
+            'ok': False
         })
 
 
