@@ -19,6 +19,10 @@ PIECES = {
     'K': 6
 }
 
+CurBoardPosition = list[list[int]]
+CurPlayer = int
+Square = tuple[int, int]
+
 
 def name_to_nums(square):
     row, col = 0, 0
@@ -29,34 +33,24 @@ def name_to_nums(square):
     return row, col
 
 
-class Board:
-    def __init__(self):
-        self.position = [[4, 3, 2, 5, 6, 2, 3, 4],
-                         [1, 1, 1, 1, 1, 1, 1, 1],
-                         [0, 0, 0, 0, 0, 0, 0, 0],
-                         [0, 0, 0, 0, 0, 0, 0, 0],
-                         [0, 0, 0, 0, 0, 0, 0, 0],
-                         [0, 0, 0, 0, 0, 0, 0, 0],
-                         [-1, -1, -1, -1, -1, -1, -1, -1],
-                         [-4, -3, -2, -5, -6, -2, -3, -4]]
+def convert_move(move: str):
+    take = False
+    if move[0].islower():
+        piece = 1
+    else:
+        piece = PIECES[move[0]]
+        move = move[1:]
 
-    def make_move(self, cur, target):
-        row, col = name_to_nums(cur)
-        piece = self.position[row][col]
-        self.position[row][col] = 0
-        row, col = name_to_nums(target)
-        self.position[row][col] = piece
-
-    def print_board(self):  # only for debugging purposes
-        for i in range(7, -1, -1):
-            for col in self.position[i]:
-                if col >= 0:
-                    print(" ", end="")
-                print(col, end=' ')
-            print()
+    row, col = name_to_nums(move[-2:])
+    move = move[:-2]
+    if move[-1] == 'x':
+        take = True
+        move = move[:-1]
+    start = move
+    return (row, col), piece, take, start
 
 
-def format_moves(moves, board, player):
+def format_moves(moves: list, board: CurBoardPosition, player: CurPlayer):
     formatted_moves = []
     for move in moves:
         if 8 > move[0] > -1 and 8 > move[1] > -1 and board[move[0]][move[1]] == 0:
@@ -67,8 +61,12 @@ def format_moves(moves, board, player):
     return tuple(formatted_moves)
 
 
-def pawn_moves(board, row, col, player):
+############################################
+
+
+def pawn_moves(board: CurBoardPosition, square: Square, player: CurPlayer):
     moves = []
+    row, col = square
     if player == 0:
         if board[row + 1][col] == 0:
             moves.append((row + 1, col))
@@ -90,12 +88,13 @@ def pawn_moves(board, row, col, player):
             moves.append((row - 1, col - 1))
 
     # TODO: en passant
-    return format_moves(moves, board, player)
+    return moves
 
 
 # noinspection DuplicatedCode
-def bishop_moves(board, row, col, player):
+def bishop_moves(board: CurBoardPosition, square: Square, player: CurPlayer):
     moves = []
+    row, col = square
     for i in range(-1, 2, 2):
         for j in range(-1, 2, 2):
             cur_row = row
@@ -112,19 +111,21 @@ def bishop_moves(board, row, col, player):
                     break
                 else:
                     break
-    return format_moves(moves, board, player)
+    return moves
 
 
-def knight_moves(board, row, col, player):
+def knight_moves(board, square: Square, player):
+    row, col = square
     moves = [(row + 2, col + 1), (row + 2, col - 1), (row - 2, col + 1), (row - 2, col - 1), (row - 1, col + 2),
              (row - 1, col - 2), (row + 1, col - 2), (row + 1, col + 2)]
-    return format_moves(moves, board, player)
+    return moves
 
 
 # noinspection DuplicatedCode
-def rook_moves(board, row, col, player):
+def rook_moves(board: CurBoardPosition, square: Square, player: CurPlayer):
     directions = ((-1, 0), (1, 0), (0, -1), (0, 1))
     moves = []
+    row, col = square
     for x, y in directions:
         cur_row = row
         cur_col = col
@@ -140,23 +141,24 @@ def rook_moves(board, row, col, player):
                 break
             else:
                 break
-    return format_moves(moves, board, player)
+    return moves
 
 
-def queen_moves(board, row, col, player):
-    return rook_moves(board, row, col, player) + bishop_moves(board, row, col, player)
+def queen_moves(board: CurBoardPosition, square: Square, player: CurPlayer):
+    return rook_moves(board, square, player) + bishop_moves(board, square, player)
 
 
-def king_moves(board, row, col, player):
+def king_moves(board: CurBoardPosition, square: Square, player: CurPlayer):
+    row, col = square
     moves = [(row, col + 1), (row, col - 1), (row + 1, col), (row - 1, col), (row - 1, col - 1),
              (row - 1, col + 1), (row + 1, col - 1), (row + 1, col + 1)]
     # TODO: Add castling
-    return format_moves(moves, board, player)
+    return moves
 
 
 ############################################
 
-def check(board, player):
+"""def check(board: CurBoardPosition, player: CurPlayer):
     king_pos = ''
     for row, line in enumerate(board):
         for col, square in enumerate(line):
@@ -168,58 +170,81 @@ def check(board, player):
     for move in possible_moves:
         if move[1][-2:] == king_pos:
             return True
-    return False
+    return False"""
 
-
-def find_moves(board, player):  # finds every square where a piece can move to (not considering checks)
-    moves = []
-    for row, line in enumerate(board):
-        for col, square in enumerate(line):
-            cur = BOARD[row][col]
-            if square == 1 and player == 0 or square == -1 and player == 1:
-                for val in pawn_moves(board, row, col, player):
-                    moves.append((cur, val))
-            elif square == 2 and player == 0 or square == -2 and player == 1:
-                for val in bishop_moves(board, row, col, player):
-                    moves.append((cur, 'B' + val))
-            elif square == 3 and player == 0 or square == -3 and player == 1:
-                for val in knight_moves(board, row, col, player):
-                    moves.append((cur, 'N' + val))
-            elif square == 4 and player == 0 or square == -4 and player == 1:
-                for val in rook_moves(board, row, col, player):
-                    moves.append((cur, 'R' + val))
-            elif square == 5 and player == 0 or square == -5 and player == 1:
-                for val in queen_moves(board, row, col, player):
-                    moves.append((cur, 'Q' + val))
-            elif square == 6 and player == 0 or square == -6 and player == 1:
-                for val in king_moves(board, row, col, player):
-                    moves.append((cur, 'K' + val))
-    return moves
-
-
-def find_legal_moves(board, player):
-    moves = []
-    for val in find_moves(board, player):
-        start, move = val
-        temp_board = Board()
-        temp_board.position = copy.deepcopy(board)
-        temp_board.make_move(start, move[-2:])
-        if not check(temp_board.position, player):
-            moves.append((start, move))
-    if moves:
-        return moves
-    else:
-        return None  # Checkmate/Stalemate
-
-
-def check_if_legal(board, player, move):
+"""def check_if_legal(board: CurBoardPosition, player: CurPlayer, move):
     legal_moves = find_legal_moves(board, player)
     if legal_moves:
         for val in legal_moves:
             start, possible_move = val
             if possible_move == move:
                 return True, start
-    return False, None
+    return False, None"""
+
+
+class Board:
+    def __init__(self):
+        self.position = [[4, 3, 2, 5, 6, 2, 3, 4],
+                         [1, 1, 1, 1, 1, 1, 1, 1],
+                         [0, 0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0, 0],
+                         [-1, -1, -1, -1, -1, -1, -1, -1],
+                         [-4, -3, -2, -5, -6, -2, -3, -4]]
+        self.possible_moves = []  # unformatted with raw position data
+        self.legal_moves = []  # formatted
+
+    def make_move(self, start, target):
+        row, col = name_to_nums(start)
+        piece = self.position[row][col]
+        self.position[row][col] = 0
+        row, col = name_to_nums(target)
+        self.position[row][col] = piece
+
+    def find_moves(self, player: CurPlayer):  # finds all legal moves
+        self.possible_moves = []
+        for row, line in enumerate(self.position):
+            for col, square in enumerate(line):
+                start = (row, col)
+                if square == 1 and player == 0 or square == -1 and player == 1:
+                    for target in pawn_moves(self.position, start, player):
+                        self.possible_moves.append((start, target))
+                elif square == 2 and player == 0 or square == -2 and player == 1:
+                    for target in bishop_moves(self.position, start, player):
+                        self.possible_moves.append((start, target))
+                elif square == 3 and player == 0 or square == -3 and player == 1:
+                    for target in knight_moves(self.position, start, player):
+                        self.possible_moves.append((start, target))
+                elif square == 4 and player == 0 or square == -4 and player == 1:
+                    for target in rook_moves(self.position, start, player):
+                        self.possible_moves.append((start, target))
+                elif square == 5 and player == 0 or square == -5 and player == 1:
+                    for target in queen_moves(self.position, start, player):
+                        self.possible_moves.append((start, target))
+                elif square == 6 and player == 0 or square == -6 and player == 1:
+                    for target in king_moves(self.position, start, player):
+                        self.possible_moves.append((start, target))
+
+        valid_moves = []
+        for move in self.possible_moves:
+            row, col = move[1][0], move[1][1]
+            if not (0 <= row <= 7 and 0 <= col <= 7):
+                continue
+            final_square = self.position[row][col]
+            if final_square > 0 and player == 0 or final_square < 0 and player == 1:
+                continue
+            valid_moves.append(move)
+
+        self.possible_moves = valid_moves
+
+    def print_board(self):  # only for debugging purposes
+        for i in range(7, -1, -1):
+            for col in self.position[i]:
+                if col >= 0:
+                    print(" ", end="")
+                print(col, end=' ')
+            print()
 
 
 class Game:
@@ -242,17 +267,17 @@ class Game:
         self.en_passant = None
 
     def move(self, move):
-        target = move[-2:]
-        legal, start = check_if_legal(self.board.position, self.turn, move)
-        if legal:
-            self.board.make_move(start, target)
-            if self.turn == 0:
-                self.made_moves.append(move)
-            else:
-                self.made_moves.append([self.made_moves.pop(), move])
-            self.turns += 1
-            self.turn = int(not self.turn)
-            return True
+        target, piece, take, start = convert_move(move)
+        #        legal, start = check_if_legal(self.board.position, self.turn, target)
+        #        if legal:
+        #            self.board.make_move(start, target)
+        #            if self.turn == 0:
+        #                self.made_moves.append(move)
+        #            else:
+        #                self.made_moves.append([self.made_moves.pop(), move])
+        #            self.turns += 1
+        #            self.turn = int(not self.turn)
+        #            return True
 
         return False
 
