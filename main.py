@@ -158,19 +158,22 @@ def king_moves(board: CurBoardPosition, square: Square, player: CurPlayer):
 
 ############################################
 
-"""def check(board: CurBoardPosition, player: CurPlayer):
-    king_pos = ''
+def in_check(board: CurBoardPosition, player: CurPlayer):
+    temp_board = Board()
+    temp_board.position = board
+    king_pos = (None, None)
     for row, line in enumerate(board):
         for col, square in enumerate(line):
             if square == 6 and player == 0:
-                king_pos = BOARD[row][col]
+                king_pos = (row, col)
             elif square == -6 and player == 1:
-                king_pos = BOARD[row][col]
-    possible_moves = find_moves(board, int(not player))
-    for move in possible_moves:
-        if move[1][-2:] == king_pos:
+                king_pos = (row, col)
+    temp_board.find_moves(not player)
+    for move in temp_board.possible_moves:
+        if move[1] == king_pos:
             return True
-    return False"""
+    return False
+
 
 """def check_if_legal(board: CurBoardPosition, player: CurPlayer, move):
     legal_moves = find_legal_moves(board, player)
@@ -194,6 +197,7 @@ class Board:
                          [-4, -3, -2, -5, -6, -2, -3, -4]]
         self.possible_moves = []  # unformatted with raw position data
         self.legal_moves = []  # formatted
+        self.mate = False
 
     def make_move(self, start, target):
         row, col = name_to_nums(start)
@@ -202,7 +206,7 @@ class Board:
         row, col = name_to_nums(target)
         self.position[row][col] = piece
 
-    def find_moves(self, player: CurPlayer):  # finds all legal moves
+    def find_moves(self, player: CurPlayer):  # finds all legal moves without considering checks
         self.possible_moves = []
         for row, line in enumerate(self.position):
             for col, square in enumerate(line):
@@ -226,6 +230,7 @@ class Board:
                     for target in king_moves(self.position, start, player):
                         self.possible_moves.append((start, target))
 
+        # sorts out moves that go out of the board or takes a piece of the player
         valid_moves = []
         for move in self.possible_moves:
             row, col = move[1][0], move[1][1]
@@ -236,6 +241,13 @@ class Board:
                 continue
             valid_moves.append(move)
 
+        self.possible_moves = valid_moves
+
+    def sort_check(self, player: CurPlayer): # sort out position with check
+        valid_moves = []
+        for move in self.possible_moves:
+            if not in_check(self.position, player):
+                valid_moves.append(move)
         self.possible_moves = valid_moves
 
     def print_board(self):  # only for debugging purposes
