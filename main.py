@@ -1,5 +1,3 @@
-import copy
-
 BOARD = (
     ("a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1"),
     ("a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2"),
@@ -24,41 +22,13 @@ CurPlayer = int
 Square = tuple[int, int]
 
 
-def name_to_nums(square):
+def name_to_nums(square: str):
     row, col = 0, 0
     for cur_row, i in enumerate(BOARD):
         for cur_col, j in enumerate(i):
             if j == square:
                 row, col = cur_row, cur_col
     return row, col
-
-
-def convert_move(move: str):
-    take = False
-    if move[0].islower():
-        piece = 1
-    else:
-        piece = PIECES[move[0]]
-        move = move[1:]
-
-    row, col = name_to_nums(move[-2:])
-    move = move[:-2]
-    if move[-1] == 'x':
-        take = True
-        move = move[:-1]
-    start = move
-    return (row, col), piece, take, start
-
-
-def format_moves(moves: list, board: CurBoardPosition, player: CurPlayer):
-    formatted_moves = []
-    for move in moves:
-        if 8 > move[0] > -1 and 8 > move[1] > -1 and board[move[0]][move[1]] == 0:
-            formatted_moves.append(BOARD[move[0]][move[1]])
-        elif (8 > move[0] > -1 and 8 > move[1] > -1) and (
-                (player == 0 and board[move[0]][move[1]] < 0) or (player == 1 and board[move[0]][move[1]] > 0)):
-            formatted_moves.append('x' + BOARD[move[0]][move[1]])
-    return tuple(formatted_moves)
 
 
 ############################################
@@ -114,7 +84,7 @@ def bishop_moves(board: CurBoardPosition, square: Square, player: CurPlayer):
     return moves
 
 
-def knight_moves(board, square: Square, player):
+def knight_moves(square: Square):
     row, col = square
     moves = [(row + 2, col + 1), (row + 2, col - 1), (row - 2, col + 1), (row - 2, col - 1), (row - 1, col + 2),
              (row - 1, col - 2), (row + 1, col - 2), (row + 1, col + 2)]
@@ -148,7 +118,7 @@ def queen_moves(board: CurBoardPosition, square: Square, player: CurPlayer):
     return rook_moves(board, square, player) + bishop_moves(board, square, player)
 
 
-def king_moves(board: CurBoardPosition, square: Square, player: CurPlayer):
+def king_moves(square: Square):
     row, col = square
     moves = [(row, col + 1), (row, col - 1), (row + 1, col), (row - 1, col), (row - 1, col - 1),
              (row - 1, col + 1), (row + 1, col - 1), (row + 1, col + 1)]
@@ -175,16 +145,6 @@ def in_check(board: CurBoardPosition, player: CurPlayer):
     return False
 
 
-"""def check_if_legal(board: CurBoardPosition, player: CurPlayer, move):
-    legal_moves = find_legal_moves(board, player)
-    if legal_moves:
-        for val in legal_moves:
-            start, possible_move = val
-            if possible_move == move:
-                return True, start
-    return False, None"""
-
-
 class Board:
     def __init__(self):
         self.position = [[4, 3, 2, 5, 6, 2, 3, 4],
@@ -200,10 +160,10 @@ class Board:
         self.mate = False
 
     def make_move(self, start, target):
-        row, col = name_to_nums(start)
+        row, col = start
         piece = self.position[row][col]
         self.position[row][col] = 0
-        row, col = name_to_nums(target)
+        row, col = target
         self.position[row][col] = piece
 
     def find_moves(self, player: CurPlayer):  # finds all legal moves without considering checks
@@ -218,7 +178,7 @@ class Board:
                     for target in bishop_moves(self.position, start, player):
                         self.possible_moves.append((start, target))
                 elif square == 3 and player == 0 or square == -3 and player == 1:
-                    for target in knight_moves(self.position, start, player):
+                    for target in knight_moves(start):
                         self.possible_moves.append((start, target))
                 elif square == 4 and player == 0 or square == -4 and player == 1:
                     for target in rook_moves(self.position, start, player):
@@ -227,7 +187,7 @@ class Board:
                     for target in queen_moves(self.position, start, player):
                         self.possible_moves.append((start, target))
                 elif square == 6 and player == 0 or square == -6 and player == 1:
-                    for target in king_moves(self.position, start, player):
+                    for target in king_moves(start):
                         self.possible_moves.append((start, target))
 
         # sorts out moves that go out of the board or takes a piece of the player
@@ -243,12 +203,16 @@ class Board:
 
         self.possible_moves = valid_moves
 
-    def sort_check(self, player: CurPlayer): # sort out position with check
+    def sort_check(self, player: CurPlayer):  # sort out position with check
         valid_moves = []
         for move in self.possible_moves:
             if not in_check(self.position, player):
                 valid_moves.append(move)
         self.possible_moves = valid_moves
+
+    def convert_moves(self):  # Converts own structure to chess notation
+        for move in self.possible_moves:
+            pass  # TODO: Implement converting own structure to chess notation
 
     def print_board(self):  # only for debugging purposes
         for i in range(7, -1, -1):
@@ -257,6 +221,45 @@ class Board:
                     print(" ", end="")
                 print(col, end=' ')
             print()
+
+
+class Move:
+    def __init__(self, move: str, board: Board, player: CurPlayer):
+        self.possible = False
+        self.take = False
+        if move[0].islower():
+            self.piece = 1
+        else:
+            self.piece = PIECES[move[0]]
+            move = move[1:]
+
+        self.target = name_to_nums(move[-2:])
+        move = move[:-2]
+        start_indication = None
+        if len(move) != 0:
+            if move[-1] == 'x':
+                self.take = True
+                move = move[:-1]
+            start_indication = move
+        if start_indication:
+            different_moves = []  # different moves possible to that square using the piece specified
+            for i in board.possible_moves:
+                row = i[0][0]
+                col = i[0][1]
+                if i[1] == self.target and abs(board.position[row][col]) == self.piece:
+                    different_moves.append(i)
+            for j, move in enumerate(different_moves):
+                start = move[0]
+                if start_indication in BOARD[start[0]][start[1]]:
+                    self.start = start
+                    self.possible = True
+        else:
+            for i in board.possible_moves:
+                row = i[0][0]
+                col = i[0][1]
+                if i[1] == self.target and abs(board.position[row][col]) == self.piece:
+                    self.start = i[0]
+                    self.possible = True
 
 
 class Game:
@@ -273,24 +276,35 @@ class Game:
         -: black
         +: white
         """
-        self.turn = 0  # 0: white, 1: black
+        self.player = 0  # 0: white, 1: black
         self.made_moves = []
         self.turns = 0
         self.en_passant = None
 
-    def move(self, move):
-        target, piece, take, start = convert_move(move)
-        #        legal, start = check_if_legal(self.board.position, self.turn, target)
-        #        if legal:
-        #            self.board.make_move(start, target)
-        #            if self.turn == 0:
-        #                self.made_moves.append(move)
-        #            else:
-        #                self.made_moves.append([self.made_moves.pop(), move])
-        #            self.turns += 1
-        #            self.turn = int(not self.turn)
-        #            return True
-
+    def play_move(self, move):
+        self.board.find_moves(self.player)
+        self.board.sort_check(self.player)
+        self.board.convert_moves()
+        self.move = Move(move, self.board, self.player)
+        if self.move.possible:
+            self.board.make_move(self.move.start, self.move.target)
+            self.player = int(not self.player)
+            return True
         return False
 
+
 # TODO: Implement Checkmate/Stalemate
+'''
+Empty board to copy when debugging
+[[0, 0, 0, 0, 0, 0, 0, 0],
+ [0, 0, 0, 0, 0, 0, 0, 0],
+ [0, 0, 0, 0, 0, 0, 0, 0],
+ [0, 0, 0, 0, 0, 0, 0, 0],
+ [0, 0, 0, 0, 0, 0, 0, 0],
+ [0, 0, 0, 0, 0, 0, 0, 0],
+ [0, 0, 0, 0, 0, 0, 0, 0],
+ [0, 0, 0, 0, 0, 0, 0, 0]]
+ 
+ !!!IMPORTANT!!! 
+ When debugging, don't forget that in chess notation, col comes first then row
+'''

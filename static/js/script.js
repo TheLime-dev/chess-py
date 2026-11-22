@@ -84,13 +84,12 @@ for (let row = 0; row < 8; row++) {
 //rank labels
 for (let row = 0; row < 8; row++) {
     const number = document.createElement("div");
-    number.textContent = toString(8 - row);
+    number.textContent = (8 - row).toString();
     rankLabels.appendChild(number);
 }
 
 
 // file labels
-
 for (const file of files) {
     const letter = document.createElement("div");
     letter.textContent = file;
@@ -98,7 +97,6 @@ for (const file of files) {
 }
 
 // display pieces
-
 async function showPieces() {
     const boardResponse = await fetch('/board');
     board = await boardResponse.json();
@@ -136,7 +134,7 @@ async function showMoves() {
 }
 
 // send piece to python
-function makeMove(starting, target) {
+async function makeMove(starting, target) {
     let move = '';
     if (pieces[Math.abs(board[selectedPosition['row']][selectedPosition['col']])] !== 'p') { // if not a pawn
         move = pieces[Math.abs(board[selectedPosition['row']][selectedPosition['col']])].toUpperCase(); // let the move be the selected piece
@@ -145,20 +143,26 @@ function makeMove(starting, target) {
         move += 'x';
     }
     move += BOARD[7 - target['row']][target['col']]
-    fetch('/move', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            move: move
-        })
-    }).then(showPieces());
+    try {
+        const response = await fetch('/move', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                move: move
+            })
+        });
+        if (!response.ok) {
+            throw new Error('Move rejected by server');
+        }
+
+        await showPieces();
+    } catch (error) {
+        console.error('Error making move:', error);
+    }
 
 
 }
 
-showPieces();
-
-
-
+showPieces();s
