@@ -1,3 +1,5 @@
+import copy
+
 BOARD = (
     ("a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1"),
     ("a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2"),
@@ -206,7 +208,10 @@ class Board:
     def sort_check(self, player: CurPlayer):  # sort out position with check
         valid_moves = []
         for move in self.possible_moves:
-            if not in_check(self.position, player):
+            tmp = Board()
+            tmp.position = copy.deepcopy(self.position)
+            tmp.make_move(move[0], move[1])
+            if not in_check(tmp.position, player):
                 valid_moves.append(move)
         self.possible_moves = valid_moves
 
